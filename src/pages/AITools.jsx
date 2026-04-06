@@ -8,6 +8,7 @@ import {
 } from '../services/aiService';
 import { isGroqConfigured } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { FlashcardViewer, parseFlashcards } from '../components/FlashcardViewer';
 
 const MODES = [
   { id: 'summary', label: 'Topic summary' },
@@ -160,7 +161,10 @@ export function AITools() {
 
         <div className="ai-output">
           {loading && <LoadingSpinner label="Calling AI…" />}
-          {!loading && output && (
+          {!loading && output && mode === 'flashcards' && (
+            <FlashcardViewer flashcards={parseFlashcards(output)} />
+          )}
+          {!loading && output && mode !== 'flashcards' && (
             <pre className="ai-output__pre">{output}</pre>
           )}
           {!loading && !output && (
