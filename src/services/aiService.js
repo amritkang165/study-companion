@@ -1,8 +1,7 @@
 import {
   groqHttp,
   quotesHttp,
-  requireGroqApiKey,
-  apiConfig,
+  requireGroqApiKey
 } from './api';
 
 const DEFAULT_GROQ_MODEL = process.env.REACT_APP_GROQ_MODEL || 'llama3-70b-8192';
