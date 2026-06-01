@@ -1,10 +1,6 @@
 import { useMemo } from 'react';
-import { useStudy } from '../context/StudyContext';
-import {
-  isTaskOverdue,
-  subjectProgressStats,
-  completionsByWeekday,
-} from '../utils/helpers';
+import { useStudy } from '../context/StudyContext.jsx'; // only this
+import { isTaskOverdue, subjectProgressStats, completionsByWeekday } from '../utils/helpers.js';
 
 export function useProgress() {
   const { tasks, topics, subjects, revisions } = useStudy();

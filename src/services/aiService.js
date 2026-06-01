@@ -1,9 +1,9 @@
 import {
   groqHttp,
   quotesHttp,
-  requireGroqApiKey
-} from './api';
-
+  requireGroqApiKey,
+  apiCall
+} from './api.js';
 const DEFAULT_GROQ_MODEL = process.env.REACT_APP_GROQ_MODEL || 'llama3-70b-8192';
 
 function buildGroqBody(messages, options = {}) {

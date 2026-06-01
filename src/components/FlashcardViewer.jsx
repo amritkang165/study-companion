@@ -36,9 +36,7 @@ export function FlashcardViewer({ flashcards }) {
   );
 }
 
-// Helper to parse AI output into flashcard objects
 export function parseFlashcards(text) {
-  // Expects lines like: Front: ... | Back: ...
   return text
     .split('\n')
     .map((line) => {

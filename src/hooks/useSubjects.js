@@ -1,4 +1,4 @@
-import { useStudy } from '../context/StudyContext';
+import { useStudy } from '../context/StudyContext.jsx';
 
 export function useSubjects() {
   const {
