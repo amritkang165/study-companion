@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { useProgress } from '../hooks/useProgress';
 import { useStudy } from '../context/StudyContext';
+import { useTheme } from '../context/ThemeContext.jsx';
 import {
   SubjectProgressChart,
   CompletionPie,
@@ -12,6 +13,7 @@ import { RevisionList } from '../components/RevisionList';
 import { fetchMotivationalQuote } from '../services/aiService';
 import { formatDateDisplay } from '../utils/helpers';
 import { parseISO, isBefore, startOfDay } from 'date-fns';
+import FullscreenPomodoro from '../components/FullscreenPomodoro.jsx';
 
 export function Dashboard() {
   const {
@@ -28,6 +30,8 @@ export function Dashboard() {
   const { updateRevision, deleteRevision, revisions } = useStudy();
   const [quote, setQuote] = useState(null);
   const [quoteLoading, setQuoteLoading] = useState(true);
+  const { theme, setTheme } = useTheme();
+  const [showPomodoroFS, setShowPomodoroFS] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,7 +78,31 @@ export function Dashboard() {
       >
         <h2>Dashboard</h2>
         <p className="muted">Your study progress at a glance</p>
+
+        {/* Add a visible dashboard action to open the fullscreen Pomodoro */}
+        <div style={{ marginTop: 6 }}>
+          <button
+            type="button"
+            className="btn btn--primary"
+            onClick={() => setShowPomodoroFS(true)}
+            style={{ transform: 'translateY(-6px)' }}
+          >
+            Open Pomodoro
+          </button>
+        </div>
+
+        {/* theme picker removed from header to avoid duplication; use right-side palette */}
       </motion.header>
+
+      {/* Right-side vertical theme bar (fixed) */}
+      <div className="theme-bar-right" role="toolbar" aria-label="Theme chooser">
+        <button aria-pressed={theme==='theme-pink'} title="Pink" className="theme-swatch theme-swatch--pink" onClick={() => setTheme('theme-pink')} />
+        <button aria-pressed={theme==='theme-green'} title="Green" className="theme-swatch theme-swatch--green" onClick={() => setTheme('theme-green')} />
+        <button aria-pressed={theme==='theme-blue'} title="Blue" className="theme-swatch theme-swatch--blue" onClick={() => setTheme('theme-blue')} />
+        <button aria-pressed={theme==='theme-yellow'} title="Yellow" className="theme-swatch theme-swatch--yellow" onClick={() => setTheme('theme-yellow')} />
+        <button aria-pressed={theme==='theme-neon'} title="Neon" className="theme-swatch theme-swatch--neon" onClick={() => setTheme('theme-neon')} />
+        <button aria-pressed={theme==='theme-indigo'} title="Indigo" className="theme-swatch theme-swatch--indigo" onClick={() => setTheme('theme-indigo')} />
+      </div>
 
       <section className="quote-card" aria-live="polite">
         {quoteLoading ? (
@@ -134,6 +162,12 @@ export function Dashboard() {
           />
         </div>
       </div>
+
+      {showPomodoroFS && (
+        <FullscreenPomodoro
+          onClose={() => setShowPomodoroFS(false)}
+        />
+      )}
     </div>
   );
 }

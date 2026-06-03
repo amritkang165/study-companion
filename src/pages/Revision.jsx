@@ -80,7 +80,7 @@ export function Revision() {
       >
         <h2>Revision planner</h2>
         <p className="muted">
-          Schedule reviews (for example, three days after completing a topic)
+          Schedule reviews for your topics.
         </p>
       </motion.header>
 

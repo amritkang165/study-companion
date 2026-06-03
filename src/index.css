@@ -22,6 +22,67 @@
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
+/* Theme modifiers */
+.theme-pink { --accent: #d9468f; --accent-dim: rgba(217,70,143,0.12); --accent-glow: rgba(217,70,143,0.35); }
+.theme-green { --accent: #10b981; --accent-dim: rgba(16,185,129,0.12); --accent-glow: rgba(16,185,129,0.35); }
+.theme-blue { --accent: #3b82f6; --accent-dim: rgba(59,130,246,0.12); --accent-glow: rgba(59,130,246,0.35); }
+.theme-yellow { --accent: #f59e0b; --accent-dim: rgba(245,158,11,0.12); --accent-glow: rgba(245,158,11,0.35); }
+.theme-neon { --accent: #7cfc00; --accent-dim: rgba(124,252,0,0.12); --accent-glow: rgba(124,252,0,0.35); }
+.theme-indigo { --accent: #7c3aed; --accent-dim: rgba(124,58,237,0.12); --accent-glow: rgba(124,58,237,0.35); }
+
+::selection { background: var(--accent-dim); color: var(--text); }
+
+/* Right-side theme bar */
+.theme-bar-right {
+  position: fixed;
+  right: 12px;
+  top: 40%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 999;
+}
+
+.theme-swatch { width:34px; height:34px; border-radius:8px; border:2px solid transparent; cursor:pointer; box-shadow: 0 6px 24px rgba(0,0,0,0.6); }
+.theme-swatch--pink { background: linear-gradient(135deg,#be185d,#d9468f,#f472b6); }
+.theme-swatch--green { background: linear-gradient(135deg,#059669,#10b981); }
+.theme-swatch--blue { background: linear-gradient(135deg,#1e3a8a,#3b82f6); }
+.theme-swatch--yellow { background: linear-gradient(135deg,#b45309,#f59e0b); }
+.theme-swatch--neon { background: linear-gradient(135deg,#00ff7f,#7cfc00); }
+.theme-swatch--indigo { background: linear-gradient(135deg,#553c9a,#7c3aed); }
+.theme-swatch[aria-pressed='true'] { border-color: var(--text); transform: translateY(-2px); }
+
+/* Fullscreen Pomodoro overlay */
+.fullscreen-pomodoro {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.8));
+  z-index: 9999;
+}
+.fullscreen-pomodoro__panel {
+  width: min(720px, 92%);
+  padding: 2rem;
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(22,26,34,0.95), rgba(18,21,28,0.9));
+  border: 1px solid var(--border);
+  text-align: center;
+  box-shadow: 0 12px 60px rgba(0,0,0,0.6), 0 0 60px var(--accent-glow);
+}
+.fullscreen-pomodoro__time {
+  font-family: var(--font-display);
+  font-size: 6rem;
+  color: var(--text);
+  margin: 0.25rem 0 0.5rem;
+}
+.fullscreen-pomodoro__controls { display:flex; gap:0.5rem; justify-content:center; margin-top:1rem; }
+.fullscreen-pomodoro__small { color: var(--muted); font-size:0.9rem; }
+.fullscreen-pomodoro__star { font-size: 2rem; color: gold; margin-left: 0.5rem; }
+
+/* theme button list */
+.theme-picker { display:flex; gap:0.5rem; align-items:center; }
+
 *,
 *::before,
 *::after {
@@ -110,7 +171,7 @@ h3,
   height: 42px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #be185d 0%, #d9468f 45%, #f472b6 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent) 45%, var(--accent-press, #f472b6) 100%);
   border-radius: 12px;
   font-size: 1.05rem;
   font-family: var(--font-display);
@@ -159,8 +220,8 @@ h3,
 .app-nav__link--active {
   color: var(--text);
   background: var(--accent-dim);
-  border-color: rgba(217, 70, 143, 0.4);
-  box-shadow: 0 0 20px rgba(217, 70, 143, 0.1);
+  border-color: rgba(0,0,0,0.0); /* use accent-dim for background */
+  box-shadow: 0 0 20px rgba(0,0,0,0.08);
 }
 
 .app-nav__icon {
@@ -822,7 +883,7 @@ h3,
 
 .ai-setup-panel {
   margin-bottom: 1rem;
-  border-color: rgba(217, 70, 143, 0.4);
+  border-color: var(--accent-dim);
   background: var(--accent-dim);
 }
 

@@ -11,6 +11,8 @@ import { Tasks } from './pages/Tasks.jsx';
 import { Revision } from './pages/Revision.jsx';
 import { AITools } from './pages/AITools.jsx';
 import { StudyProvider } from './context/StudyContext.jsx';
+import Pomodoro from './pages/Pomodoro.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
 
 import Login from "./pages/Login.jsx"; // 👉 you will create this
 
@@ -37,6 +39,8 @@ function App() {
             <Route path="subjects" element={<Subjects />} />
             <Route path="tasks" element={<Tasks />} />
             <Route path="revision" element={<Revision />} />
+            <Route path="pomodoro" element={<Pomodoro />} />
+            <Route path="profile" element={<ProfilePage />} />
             <Route path="ai-tools" element={<AITools />} />
           </Route>
 

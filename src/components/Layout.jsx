@@ -6,6 +6,8 @@ import {
   HiClipboardDocumentList,
   HiCalendarDays,
   HiSparkles,
+  HiClock,
+  HiUser,
 } from 'react-icons/hi2';
 
 const nav = [
@@ -13,7 +15,9 @@ const nav = [
   { to: '/subjects', label: 'Subjects', icon: HiBookOpen },
   { to: '/tasks', label: 'Tasks', icon: HiClipboardDocumentList },
   { to: '/revision', label: 'Revision', icon: HiCalendarDays },
+  { to: '/pomodoro', label: 'Pomodoro', icon: HiClock },
   { to: '/ai-tools', label: 'AI Tools', icon: HiSparkles },
+  { to: '/profile', label: 'Profile', icon: HiUser },
 ];
 
 export function Layout() {

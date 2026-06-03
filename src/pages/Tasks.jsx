@@ -1,21 +1,14 @@
 import React, { useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
-import { parseISO, compareAsc } from 'date-fns';
 import { useTasks } from '../hooks/useTasks';
 import { useSubjects } from '../hooks/useSubjects';
-import { TaskCard } from '../components/TaskCard';
-import { SearchBar } from '../components/SearchBar';
 import { useDebounce } from '../hooks/useDebounce';
-import {
-  TASK_PRIORITIES,
-  TASK_STATUSES,
-  isTaskOverdue,
-  priorityOrder,
-} from '../utils/helpers';
+import { TASK_PRIORITIES, TASK_STATUSES, isTaskOverdue, priorityOrder } from '../utils/helpers';
+import { TaskCard } from '../components/TaskCard';
 
 const taskSchema = yup.object({
   title: yup.string().required('Title is required').max(200),
@@ -36,8 +29,6 @@ const TABS = [
 
 function matchesTab(task, tab) {
   switch (tab) {
-    case 'all':
-      return true;
     case 'pending':
       return task.status === 'Pending';
     case 'completed':
@@ -84,95 +75,49 @@ export function Tasks() {
 
   const formSubjectName = watch('subject');
   const formTopicOptions = useMemo(() => {
-    if (!formSubjectName) return topics;
-    const sub = subjects.find((s) => s.name === formSubjectName);
-    if (!sub) return topics;
-    return topics.filter((t) => t.subjectId === sub.id);
+    return topics.filter((t) => {
+      const sub = subjects.find((s) => s.name === formSubjectName);
+      return sub ? t.subjectId === sub.id : true;
+    });
   }, [subjects, topics, formSubjectName]);
 
   const onSubmit = (data) => {
-    addTask({
-      ...data,
-      deadline: data.deadline || null,
-    });
-    toast.success('Task created');
-    reset({
-      title: '',
-      subject: data.subject,
-      topic: '',
-      deadline: '',
-      priority: 'Medium',
-      status: 'Pending',
-    });
+    addTask(data);
+    toast.success('Task added');
+    reset({ title: '', subject: '', topic: '', deadline: '', priority: 'Medium', status: 'Pending' });
   };
 
   const filtered = useMemo(() => {
-    const q = debounced.trim().toLowerCase();
-    let list = tasks.filter((t) => matchesTab(t, tab));
-
-    if (filterSubject) {
-      list = list.filter((t) => t.subject === filterSubject);
-    }
-    if (filterPriority) {
-      list = list.filter((t) => t.priority === filterPriority);
-    }
-    if (filterStatus) {
-      list = list.filter((t) => t.status === filterStatus);
-    }
-    if (filterDeadlineBefore) {
-      const before = parseISO(filterDeadlineBefore);
-      list = list.filter((t) => {
-        if (!t.deadline) return false;
-        return compareAsc(parseISO(t.deadline), before) <= 0;
+    return tasks
+      .filter((t) => matchesTab(t, tab))
+      .filter((t) => {
+        const q = debounced.trim().toLowerCase();
+        if (!q) return true;
+        return (
+          (t.title || '').toLowerCase().includes(q) ||
+          (t.subject || '').toLowerCase().includes(q) ||
+          (t.topic || '').toLowerCase().includes(q)
+        );
+      })
+      .filter((t) => (filterSubject ? t.subject === filterSubject : true))
+      .filter((t) => (filterPriority ? t.priority === filterPriority : true))
+      .filter((t) => (filterStatus ? t.status === filterStatus : true))
+      .filter((t) => (filterDeadlineBefore ? (t.deadline || '') <= filterDeadlineBefore : true))
+      .sort((a, b) => {
+        if (sortBy === 'due') {
+          if (!a.deadline) return 1;
+          if (!b.deadline) return -1;
+          return a.deadline.localeCompare(b.deadline);
+        }
+        if (sortBy === 'priority') {
+          return priorityOrder(a.priority) - priorityOrder(b.priority);
+        }
+        if (sortBy === 'created') {
+          return a.id.localeCompare(b.id);
+        }
+        return 0;
       });
-    }
-
-    if (q) {
-      const topicNotesMatch = new Set(
-        topics
-          .filter(
-            (top) =>
-              top.name.toLowerCase().includes(q) ||
-              (top.notes || '').toLowerCase().includes(q)
-          )
-          .map((top) => top.name)
-      );
-      list = list.filter(
-        (t) =>
-          t.title.toLowerCase().includes(q) ||
-          t.topic.toLowerCase().includes(q) ||
-          t.subject.toLowerCase().includes(q) ||
-          topicNotesMatch.has(t.topic)
-      );
-    }
-
-    const sorted = [...list];
-    if (sortBy === 'due') {
-      sorted.sort((a, b) => {
-        if (!a.deadline && !b.deadline) return 0;
-        if (!a.deadline) return 1;
-        if (!b.deadline) return -1;
-        return compareAsc(parseISO(a.deadline), parseISO(b.deadline));
-      });
-    } else if (sortBy === 'priority') {
-      sorted.sort(
-        (a, b) => priorityOrder(a.priority) - priorityOrder(b.priority)
-      );
-    } else if (sortBy === 'subject') {
-      sorted.sort((a, b) => a.subject.localeCompare(b.subject));
-    }
-    return sorted;
-  }, [
-    tasks,
-    tab,
-    debounced,
-    filterSubject,
-    filterPriority,
-    filterStatus,
-    filterDeadlineBefore,
-    sortBy,
-    topics,
-  ]);
+  }, [tasks, tab, debounced, filterSubject, filterPriority, filterStatus, filterDeadlineBefore, sortBy, topics]);
 
   return (
     <div className="page">
@@ -181,17 +126,15 @@ export function Tasks() {
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h2>Study tasks</h2>
-        <p className="muted">Track deadlines, priorities, and revision work</p>
+        <h2>Tasks</h2>
+        <p className="muted">Create and manage study tasks</p>
       </motion.header>
 
-      <div className="tabs" role="tablist" aria-label="Task categories">
+      <div className="tabs" style={{ marginBottom: '0.75rem' }}>
         {TABS.map((t) => (
           <button
             key={t.id}
             type="button"
-            role="tab"
-            aria-selected={tab === t.id}
             className={`tabs__btn ${tab === t.id ? 'tabs__btn--active' : ''}`}
             onClick={() => setTab(t.id)}
           >
@@ -200,119 +143,31 @@ export function Tasks() {
         ))}
       </div>
 
-      <SearchBar
-        value={search}
-        onChange={setSearch}
-        placeholder="Search tasks, topics, notes…"
-      />
-
-      <div className="filters-bar">
-        <label className="filters-bar__item">
-          <span>Subject</span>
-          <select
-            className="input input--sm"
-            value={filterSubject}
-            onChange={(e) => setFilterSubject(e.target.value)}
-          >
-            <option value="">All</option>
-            {subjects.map((s) => (
-              <option key={s.id} value={s.name}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="filters-bar__item">
-          <span>Priority</span>
-          <select
-            className="input input--sm"
-            value={filterPriority}
-            onChange={(e) => setFilterPriority(e.target.value)}
-          >
-            <option value="">All</option>
-            {TASK_PRIORITIES.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="filters-bar__item">
-          <span>Status</span>
-          <select
-            className="input input--sm"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="">All</option>
-            {TASK_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="filters-bar__item">
-          <span>Deadline by</span>
-          <input
-            type="date"
-            className="input input--sm"
-            value={filterDeadlineBefore}
-            onChange={(e) => setFilterDeadlineBefore(e.target.value)}
-          />
-        </label>
-        <label className="filters-bar__item">
-          <span>Sort</span>
-          <select
-            className="input input--sm"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-          >
-            <option value="due">Due date</option>
-            <option value="priority">Priority</option>
-            <option value="subject">Subject name</option>
-          </select>
-        </label>
-      </div>
-
-      <div className="layout-split layout-split--tasks">
+      <div className="layout-split">
         <section className="panel">
           <h3 className="panel__title">New task</h3>
           <form className="form" onSubmit={handleSubmit(onSubmit)}>
             <label className="form__label">
               Title
               <input className="input" {...register('title')} />
-              {errors.title && (
-                <span className="form__error">{errors.title.message}</span>
-              )}
+              {errors.title && <span className="form__error">{errors.title.message}</span>}
             </label>
             <label className="form__label">
-              Subject
-              <select
-                className="input"
-                {...register('subject', {
-                  onChange: () => setValue('topic', ''),
-                })}
-              >
+              Subject (name)
+              <select className="input" {...register('subject')}>
                 <option value="">Select…</option>
                 {subjects.map((s) => (
-                  <option key={s.id} value={s.name}>
-                    {s.name}
-                  </option>
+                  <option key={s.id} value={s.name}>{s.name}</option>
                 ))}
               </select>
-              {errors.subject && (
-                <span className="form__error">{errors.subject.message}</span>
-              )}
+              {errors.subject && <span className="form__error">{errors.subject.message}</span>}
             </label>
             <label className="form__label">
               Topic
               <select className="input" {...register('topic')}>
-                <option value="">Optional</option>
+                <option value="">Select…</option>
                 {formTopicOptions.map((t) => (
-                  <option key={t.id} value={t.name}>
-                    {t.name}
-                  </option>
+                  <option key={t.id} value={t.name}>{t.name}</option>
                 ))}
               </select>
             </label>
@@ -324,9 +179,7 @@ export function Tasks() {
               Priority
               <select className="input" {...register('priority')}>
                 {TASK_PRIORITIES.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
+                  <option key={p} value={p}>{p}</option>
                 ))}
               </select>
             </label>
@@ -334,42 +187,69 @@ export function Tasks() {
               Status
               <select className="input" {...register('status')}>
                 {TASK_STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
+                  <option key={s} value={s}>{s}</option>
                 ))}
               </select>
             </label>
-            <button type="submit" className="btn btn--primary">
-              Add task
-            </button>
+            <div className="form__actions">
+              <button type="submit" className="btn btn--primary">Add task</button>
+            </div>
           </form>
         </section>
 
-        <section className="task-list-wrap">
-          <p className="muted small">
-            Showing {filtered.length} of {tasks.length} tasks
-          </p>
+        <section className="panel panel--wide">
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', alignItems: 'center' }}>
+            <input
+              className="input"
+              style={{ flex: 1 }}
+              placeholder="Search tasks…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <select className="input" value={filterSubject} onChange={(e) => setFilterSubject(e.target.value)}>
+              <option value="">All subjects</option>
+              {subjects.map((s) => (<option key={s.id} value={s.name}>{s.name}</option>))}
+            </select>
+            <select className="input" value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)}>
+              <option value="">All priorities</option>
+              {TASK_PRIORITIES.map((p) => (<option key={p} value={p}>{p}</option>))}
+            </select>
+            <select className="input" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+              <option value="">All statuses</option>
+              {TASK_STATUSES.map((s) => (<option key={s} value={s}>{s}</option>))}
+            </select>
+          </div>
+
+          <div style={{ marginBottom: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+            <label className="small muted">Sort by:</label>
+            <select className="input" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              <option value="due">Due date</option>
+              <option value="priority">Priority</option>
+              <option value="created">Created</option>
+            </select>
+
+            <label style={{ marginLeft: 'auto' }} className="small muted">Filter before:</label>
+            <input type="date" className="input" value={filterDeadlineBefore} onChange={(e) => setFilterDeadlineBefore(e.target.value)} />
+          </div>
+
           <div className="task-list">
-            {filtered.map((task) => (
+            {filtered.length === 0 && <p className="muted">No tasks found.</p>}
+            {filtered.map((t) => (
               <TaskCard
-                key={task.id}
-                task={task}
-                onToggleComplete={(t, next) => {
-                  updateTask(t.id, { status: next });
-                  toast.info(next === 'Completed' ? 'Nice work!' : 'Task reopened');
+                key={t.id}
+                task={t}
+                onToggleComplete={(task, status) => {
+                  updateTask(task.id, { status });
+                  toast.success(status === 'Completed' ? 'Marked completed' : 'Marked pending');
                 }}
-                onDelete={(t) => {
-                  if (window.confirm('Delete this task?')) {
-                    deleteTask(t.id);
+                onDelete={(task) => {
+                  if (window.confirm('Delete task?')) {
+                    deleteTask(task.id);
                     toast.info('Task deleted');
                   }
                 }}
               />
             ))}
-            {!filtered.length && (
-              <p className="muted">No tasks match your filters.</p>
-            )}
           </div>
         </section>
       </div>

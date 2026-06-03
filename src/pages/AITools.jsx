@@ -130,7 +130,7 @@ export function AITools() {
             className="input"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="e.g. Binary Search Trees"
+            placeholder="Enter topic or prompt"
           />
         </label>
         {mode === 'summary' && (
@@ -169,8 +169,7 @@ export function AITools() {
           )}
           {!loading && !output && (
             <p className="muted">
-              Example: “Generate a summary for Binary Search Trees” — enter the
-              topic above and choose a mode.
+              Enter a topic or prompt above and choose a mode to generate content.
             </p>
           )}
         </div>
