@@ -1,6 +1,15 @@
 import { useMemo } from 'react';
-import { useStudy } from '../context/StudyContext.jsx'; // only this
-import { isTaskOverdue, subjectProgressStats, completionsByWeekday } from '../utils/helpers.js';
+import { useStudy } from '../context/StudyContext.jsx';
+import {
+  isTaskOverdue,
+  subjectProgressStats,
+  completionsByWeekday,
+  getCompletionDates,
+  computeStreak,
+  getMonthlyActivity,
+  priorityBreakdown,
+  thisWeekVsLastWeek,
+} from '../utils/helpers.js';
 
 export function useProgress() {
   const { tasks, topics, subjects, revisions } = useStudy();
@@ -17,6 +26,13 @@ export function useProgress() {
     const weekly = completionsByWeekday(tasks);
     const upcomingRevisions = revisions.filter((r) => r.status === 'scheduled');
 
+    const completionDates = getCompletionDates(tasks);
+    const streak = computeStreak(completionDates);
+    const now = new Date();
+    const monthly = getMonthlyActivity(tasks, now.getFullYear(), now.getMonth() + 1);
+    const priorities = priorityBreakdown(tasks);
+    const weekComparison = thisWeekVsLastWeek(tasks);
+
     return {
       total,
       completed,
@@ -27,6 +43,10 @@ export function useProgress() {
       subjectChart,
       weekly,
       upcomingRevisions,
+      streak,
+      monthly,
+      priorities,
+      weekComparison,
     };
   }, [tasks, topics, subjects, revisions]);
 }

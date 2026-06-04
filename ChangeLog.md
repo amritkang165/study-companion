@@ -1,5 +1,18 @@
 # Changelog
 
+- 2026-06-04 22:30:00 - Task experience improvements, analytics, consistency tracking, profile page:
+  - Added status filter tabs (All/Pending/Completed/Overdue) with counts to tasks panel on Subjects & Tasks page.
+  - Added sort toggle (by deadline / by priority) for the task list.
+  - Added consistency heatmap on dashboard: monthly calendar grid showing daily task completions with 5-level intensity.
+  - Added streak display (current day streak + best streak) and week-over-week comparison on dashboard.
+  - Added priority breakdown chart (High/Medium/Low distribution with horizontal bars) on dashboard.
+  - Added `getCompletionDates`, `computeStreak`, `getMonthlyActivity`, `priorityBreakdown`, `thisWeekVsLastWeek` helpers to helpers.js.
+  - Exposed `streak`, `monthly`, `priorities`, `weekComparison` from useProgress hook.
+  - Added `ConsistencyHeatmap` and `PriorityBreakdown` chart components to ProgressChart.
+  - Rebuilt profile page with: initials avatar, editable name (click to edit, persists via Supabase), full name updates dashboard, stats card grid (tasks, completed, subjects, streak), account details section, change password form.
+  - Removed "Today" stat card and "Today's Checklist" panel from dashboard.
+  - All derived analytics from existing `completedAt` timestamps — no new storage needed.
+
 - 2026-06-04 18:00:00 - Dashboard date, checklist, focus mode:
   - Added today's date (formatted) next to stat cards on dashboard.
   - Added "Today's Checklist" panel with add/toggle/remove items, persisted per-day in localStorage.

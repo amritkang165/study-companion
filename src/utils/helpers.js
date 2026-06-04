@@ -1,5 +1,6 @@
 import {
   addDays,
+  differenceInDays,
   format,
   isBefore,
   parseISO,
@@ -84,4 +85,93 @@ export function subjectProgressStats(subjects, topics) {
 
 export function defaultRevisionDate() {
   return format(addDays(new Date(), 3), 'yyyy-MM-dd');
+}
+
+export function getCompletionDates(tasks) {
+  return tasks
+    .filter((t) => t.status === 'Completed' && t.completedAt)
+    .map((t) => format(parseISO(t.completedAt), 'yyyy-MM-dd'));
+}
+
+export function computeStreak(completedDates) {
+  if (!completedDates.length) return { current: 0, longest: 0 };
+  const unique = [...new Set(completedDates)].sort().reverse();
+
+  let current = 0;
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const yesterday = format(addDays(new Date(), -1), 'yyyy-MM-dd');
+  let check = today;
+  while (unique.includes(check)) {
+    current++;
+    check = format(addDays(parseISO(check), -1), 'yyyy-MM-dd');
+  }
+  if (current === 0 && unique.includes(yesterday)) {
+    current = 1;
+    check = yesterday;
+    while (unique.includes(check)) {
+      current++;
+      check = format(addDays(parseISO(check), -1), 'yyyy-MM-dd');
+    }
+  }
+
+  const sorted = [...new Set(completedDates)].sort();
+  let longest = 1;
+  let temp = 1;
+  for (let i = 1; i < sorted.length; i++) {
+    const diff = differenceInDays(parseISO(sorted[i]), parseISO(sorted[i - 1]));
+    if (diff === 1) {
+      temp++;
+      longest = Math.max(longest, temp);
+    } else {
+      temp = 1;
+    }
+  }
+
+  return { current, longest };
+}
+
+export function getMonthlyActivity(tasks, year, month) {
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const completionDates = getCompletionDates(tasks);
+  const counts = {};
+  completionDates.forEach((d) => { counts[d] = (counts[d] || 0) + 1; });
+
+  const result = [];
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    result.push({ date: d, count: counts[dateStr] || 0 });
+  }
+  return result;
+}
+
+export function priorityBreakdown(tasks) {
+  return TASK_PRIORITIES.map((p) => ({
+    priority: p,
+    count: tasks.filter((t) => t.priority === p).length,
+  }));
+}
+
+export function thisWeekVsLastWeek(tasks) {
+  const now = new Date();
+  const thisWeekStart = startOfWeek(now, { weekStartsOn: 1 });
+  const lastWeekStart = addDays(thisWeekStart, -7);
+  const lastWeekEnd = addDays(thisWeekStart, -1);
+
+  const thisWeek = tasks.filter((t) => {
+    if (t.status !== 'Completed' || !t.completedAt) return false;
+    return isWithinInterval(parseISO(t.completedAt), {
+      start: thisWeekStart,
+      end: endOfWeek(now, { weekStartsOn: 1 }),
+    });
+  }).length;
+
+  const lastWeek = tasks.filter((t) => {
+    if (t.status !== 'Completed' || !t.completedAt) return false;
+    return isWithinInterval(parseISO(t.completedAt), {
+      start: lastWeekStart,
+      end: lastWeekEnd,
+    });
+  }).length;
+
+  return { thisWeek, lastWeek };
 }

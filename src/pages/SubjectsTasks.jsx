@@ -9,7 +9,7 @@ import { useTasks } from '../hooks/useTasks';
 import { useDebounce } from '../hooks/useDebounce';
 import { SubjectCard } from '../components/SubjectCard';
 import { TaskCard } from '../components/TaskCard';
-import { TOPIC_STATUSES, TASK_PRIORITIES } from '../utils/helpers';
+import { TOPIC_STATUSES, TASK_PRIORITIES, isTaskOverdue } from '../utils/helpers';
 
 const subjectSchema = yup.object({
   name: yup.string().required('Name is required').max(120),
@@ -42,6 +42,8 @@ export function SubjectsTasks() {
   const [expandedSubjectId, setExpandedSubjectId] = useState(null);
   const [showSubjectForm, setShowSubjectForm] = useState(false);
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const [taskFilter, setTaskFilter] = useState('All');
+  const [taskSort, setTaskSort] = useState('deadline');
 
   const {
     register: regSub,
@@ -82,15 +84,32 @@ export function SubjectsTasks() {
 
   const filteredTasks = useMemo(() => {
     const q = debounced.trim().toLowerCase();
-    return tasks.filter((t) => {
+    let result = tasks.filter((t) => {
       if (q && !t.title.toLowerCase().includes(q) && !(t.subject || '').toLowerCase().includes(q)) return false;
+      if (taskFilter === 'Pending' && t.status !== 'Pending') return false;
+      if (taskFilter === 'Completed' && t.status !== 'Completed') return false;
+      if (taskFilter === 'Overdue' && !isTaskOverdue(t)) return false;
       return true;
-    }).sort((a, b) => {
-      if (!a.deadline) return 1;
-      if (!b.deadline) return -1;
-      return a.deadline.localeCompare(b.deadline);
     });
-  }, [tasks, debounced]);
+    if (taskSort === 'deadline') {
+      result.sort((a, b) => {
+        if (!a.deadline) return 1;
+        if (!b.deadline) return -1;
+        return a.deadline.localeCompare(b.deadline);
+      });
+    } else {
+      const order = { High: 0, Medium: 1, Low: 2 };
+      result.sort((a, b) => (order[a.priority] ?? 3) - (order[b.priority] ?? 3));
+    }
+    return result;
+  }, [tasks, debounced, taskFilter, taskSort]);
+
+  const filterCounts = useMemo(() => ({
+    All: tasks.length,
+    Pending: tasks.filter((t) => t.status === 'Pending').length,
+    Completed: tasks.filter((t) => t.status === 'Completed').length,
+    Overdue: tasks.filter(isTaskOverdue).length,
+  }), [tasks]);
 
   const onSubjectSubmit = (data) => {
     if (editingSubject) {
@@ -194,11 +213,22 @@ export function SubjectsTasks() {
         <div className="split-divider" />
 
         <section className="tasks-panel">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.5rem' }}>
-            <h3 style={{ margin: 0, fontSize: '1rem' }}>All Tasks ({tasks.length})</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.4rem' }}>
+            <h3 style={{ margin: 0, fontSize: '1rem' }}>Tasks ({filteredTasks.length})</h3>
             <button type="button" className="btn btn--primary btn--sm" style={{ marginLeft: 'auto' }} onClick={() => setShowTaskForm(!showTaskForm)}>
               {showTaskForm ? 'Cancel' : '+ Task'}
             </button>
+          </div>
+          <div style={{ display: 'flex', gap: 4, marginBottom: '0.4rem', flexWrap: 'wrap' }}>
+            {['All', 'Pending', 'Completed', 'Overdue'].map((f) => (
+              <button key={f} type="button" className={`btn btn--sm ${taskFilter === f ? 'btn--primary' : 'btn--ghost'}`} style={{ fontSize: '0.75rem' }} onClick={() => setTaskFilter(f)}>
+                {f} <span className="muted" style={{ opacity: 0.6 }}>({filterCounts[f]})</span>
+              </button>
+            ))}
+            <select className="input input--sm" style={{ marginLeft: 'auto', fontSize: '0.75rem', width: 'auto' }} value={taskSort} onChange={(e) => setTaskSort(e.target.value)}>
+              <option value="deadline">By deadline</option>
+              <option value="priority">By priority</option>
+            </select>
           </div>
           {showTaskForm && (
             <div className="panel" style={{ padding: '0.6rem', marginBottom: '0.5rem' }}>
