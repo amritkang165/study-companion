@@ -1,5 +1,18 @@
 # Changelog
 
+- 2026-06-05 00:45:00 - Dark/light mode toggle:
+  - Added tiny sun/moon button in nav bar (last item) to toggle between dark and light modes
+  - Persists to `localStorage` via `sc-dark-mode` key, defaults to dark
+  - Uses `.dark` CSS class on `<html>` with CSS variable overrides for all surfaces, borders, shadows, text
+  - Created `DarkModeContext.jsx` with `useDarkMode()` hook
+- 2026-06-05 00:30:00 - Neo-brutalist light mode redesign with column layout:
+  - **Light mode**: Warm cream background (`#f4efe9`), white surfaces (`#ffffff`), dark text (`#1c1815`)
+  - **Brutalist style**: 2px solid borders everywhere, hard offset shadows (4-6px, no blur), minimal radii (4-6px), no glass effects
+  - **Column layout**: Dashboard reorganized into 3 vertical columns — Active tasks (col 1) | Heatmap + Weekly chart (col 2) | Pie + Priority (col 3)
+  - **Bold UI**: Solid accent fills (`#e8505b`), uppercase section titles, 800-weight display type, chunky borders
+  - **Interactions**: Buttons shift 2px down+right on click (removes shadow), shift -1px -1px with deeper shadow on hover
+  - **All surfaces**: Cards, panels, inputs all use 2px solid border with offset shadow for cohesive brutalist look
+  - Removed all dark-mode gradients, glass blur, glow effects, and noise texture
 - 2026-06-04 23:55:00 - Warm/human/creative UI overhaul:
   - **Warm palette**: Deep warm-toned surfaces (`#0b090c`, `#17131c`), rose accent (`#e8505b`), warm amber accent (`#e8a050`), muted rose text (`#8f7e88`)
   - **Softer shapes**: Pill-shaped buttons and inputs (`border-radius: 9999px`), larger card radii (16px/24px/28px), squircle-style panels

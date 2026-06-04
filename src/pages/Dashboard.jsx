@@ -77,13 +77,6 @@ export function Dashboard() {
 
   return (
     <div className="page dashboard">
-      {/* Decorative notch */}
-      <div style={{
-        position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)',
-        width: 'clamp(160px, 30vw, 320px)', height: '180px',
-        background: `radial-gradient(ellipse 60% 100% at 50% 0%, var(--warm-dim), transparent 70%)`,
-        pointerEvents: 'none', zIndex: 0,
-      }} />
       <motion.header
         className="page-header"
         initial={{ opacity: 0, y: -6 }}
@@ -154,11 +147,11 @@ export function Dashboard() {
         <StatCard label="Completed" value={completed} accent="var(--success)" />
         <StatCard label="Pending" value={pending} />
         <StatCard label="Overdue" value={overdue} warn={overdue > 0} />
+        <StatCard label="Day streak" value={`${streak.current}d`} accent="var(--accent)" sub={streak.longest > 0 ? `Best: ${streak.longest}d` : undefined} />
       </motion.section>
 
       <div className="dashboard-grid">
-        <ConsistencyHeatmap monthly={monthly} streak={streak} weekComparison={weekComparison} />
-        <div className="panel" style={{ display: 'flex', flexDirection: 'column', maxHeight: 340 }}>
+        <div className="panel" style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <h3 className="panel__title" style={{ margin: 0, fontSize: '0.95rem' }}>Active tasks ({tasks.length - completedTaskCount})</h3>
             <button type="button" className="btn btn--ghost btn--sm" style={{ fontSize: '0.75rem' }} onClick={() => navigate('/subjects-tasks')}>View all</button>
@@ -175,7 +168,7 @@ export function Dashboard() {
           </div>
           <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
             {displayTasks.length === 0 && (
-              <p className="muted small" style={{ margin: 'auto', textAlign: 'center' }}>All caught up! 🎉</p>
+              <p className="muted small" style={{ margin: 'auto', textAlign: 'center' }}>All caught up!</p>
             )}
             <AnimatePresence mode="popLayout">
               {displayTasks.map((t) => (
@@ -187,7 +180,8 @@ export function Dashboard() {
                   exit={{ opacity: 0, height: 0 }}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px',
-                    borderRadius: 8, background: 'var(--surface-2)',
+                    borderRadius: 'var(--radius)', background: 'var(--surface-2)',
+                    border: '1px solid var(--border)',
                     borderLeft: isTaskOverdue(t) ? '3px solid var(--danger)' : '3px solid transparent',
                   }}
                 >
@@ -196,14 +190,14 @@ export function Dashboard() {
                     onClick={() => { updateTask(t.id, { status: 'Completed' }); toast.success('Task completed'); }}
                     whileTap={{ scale: 0.8 }}
                     style={{
-                      width: 22, height: 22, borderRadius: 8, flexShrink: 0,
-                      border: `1px solid ${isTaskOverdue(t) ? 'var(--danger)' : 'var(--border)'}`,
+                      width: 22, height: 22, borderRadius: 'var(--radius)', flexShrink: 0,
+                      border: `2px solid ${isTaskOverdue(t) ? 'var(--danger)' : 'var(--border)'}`,
                       background: 'transparent', cursor: 'pointer', padding: 0,
                       display: 'grid', placeItems: 'center',
-                      color: 'transparent', transition: 'all 0.2s',
+                      color: 'transparent', transition: 'all 0.15s',
                     }}
                   >
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--accent-press)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="2,6 5,9 10,2" />
                     </svg>
                   </motion.button>
@@ -223,14 +217,19 @@ export function Dashboard() {
             </AnimatePresence>
           </div>
         </div>
-        <div className="panel">
-          <CompletionPie percent={completionPercent} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <ConsistencyHeatmap monthly={monthly} streak={streak} weekComparison={weekComparison} />
+          <div className="panel panel--wide" style={{ gridColumn: 'unset' }}>
+            <WeeklyProductivityChart data={weekly} />
+          </div>
         </div>
-        {priorities.some((p) => p.count > 0) && (
-          <PriorityBreakdown priorities={priorities} />
-        )}
-        <div className="panel panel--wide">
-          <WeeklyProductivityChart data={weekly} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="panel">
+            <CompletionPie percent={completionPercent} />
+          </div>
+          {priorities.some((p) => p.count > 0) && (
+            <PriorityBreakdown priorities={priorities} />
+          )}
         </div>
       </div>
 
@@ -245,7 +244,7 @@ export function Dashboard() {
   );
 }
 
-function StatCard({ label, value, accent, warn }) {
+function StatCard({ label, value, accent, warn, sub }) {
   return (
     <motion.div
       className={`stat-card ${warn ? 'stat-card--warn' : ''}`}
@@ -259,6 +258,7 @@ function StatCard({ label, value, accent, warn }) {
         {value}
       </span>
       <span className="stat-card__label">{label}</span>
+      {sub && <span className="stat-card__sub" style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>{sub}</span>}
     </motion.div>
   );
 }

@@ -1,11 +1,14 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
+import { useDarkMode } from '../context/DarkModeContext';
 import {
   HiSquares2X2,
   HiBookOpen,
   HiSparkles,
   HiClock,
   HiUser,
+  HiSun,
+  HiMoon,
 } from 'react-icons/hi2';
 const nav = [
   { to: '/dashboard', label: 'Dashboard', icon: HiSquares2X2 },
@@ -16,6 +19,7 @@ const nav = [
 ];
 
 export function Layout() {
+  const { dark, toggle } = useDarkMode();
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -43,6 +47,15 @@ export function Layout() {
 
             </React.Fragment>
           ))}
+          <button
+            type="button"
+            className="app-nav__link"
+            onClick={toggle}
+            aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+            style={{ cursor: 'pointer', background: 'none', border: 'none' }}
+          >
+            {dark ? <HiSun className="app-nav__icon" /> : <HiMoon className="app-nav__icon" />}
+          </button>
         </nav>
       </header>
       <main className="app-main">

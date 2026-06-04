@@ -10,8 +10,8 @@ import {
 } from 'recharts';
 import { PieChart, Pie, Cell, Legend } from 'recharts';
 
-const PIE_COLORS = ['var(--accent)', 'var(--surface)'];
-const HEAT_COLORS = ['var(--surface)', '#1a6b3c', '#27ae60', '#2ecc71', '#58d68d'];
+const PIE_COLORS = ['var(--accent)', '#e0dbd5'];
+const HEAT_COLORS = ['#e0dbd5', '#1a6b3c', '#27ae60', '#2ecc71', '#58d68d'];
 
 export function SubjectProgressChart({ data }) {
   if (!data?.length) {
@@ -156,7 +156,8 @@ export function ConsistencyHeatmap({ monthly, streak, weekComparison }) {
                   width: 14,
                   height: 14,
                   borderRadius: 3,
-                  background: d ? heatColor(d.count, maxCount) : 'transparent',
+                  background: d ? heatColor(d.count, maxCount) : 'var(--surface-2)',
+                  border: '1px solid var(--border)',
                 }}
               />
             ))}

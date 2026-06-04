@@ -9,16 +9,17 @@
 .arrow-btn {
   background: var(--accent);
   color: #fff;
-  border: none;
-  border-radius: 50%;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
   width: 2.5rem;
   height: 2.5rem;
   font-size: 1.5rem;
-  box-shadow: 0 0 10px var(--accent), 0 0 20px rgba(0, 0, 0, 0.35);
+  box-shadow: 4px 4px 0px rgba(42, 36, 32, 0.1);
   cursor: pointer;
-  transition: transform 0.12s, box-shadow 0.12s;
+  transition: transform 0.1s;
 }
-.arrow-btn:hover { transform: translateY(-2px); }
+.arrow-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+.arrow-btn:hover { transform: translate(-1px, -1px); box-shadow: 6px 6px 0px rgba(42, 36, 32, 0.12); }
 
 .flashcard {
   width: 320px;
@@ -36,12 +37,12 @@
   align-items: center;
   justify-content: center;
   font-size: 1.2rem;
-  border-radius: 16px;
-  box-shadow: 0 0 16px var(--accent-glow);
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.48));
+  border-radius: var(--radius);
+  box-shadow: 5px 5px 0px rgba(42, 36, 32, 0.08);
+  background: var(--surface);
+  border: 2px solid var(--border);
   color: var(--text);
   padding: 1.5rem;
-  transition: box-shadow 0.3s;
 }
 .flashcard-front {
   z-index: 2;
