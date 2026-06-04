@@ -9,26 +9,29 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Run once → load logged-in user
   useEffect(() => {
+    let cancelled = false;
+
     supabase.auth
       .getSession()
       .then(({ data }) => {
-        setUser(data?.session?.user ?? null);
+        if (!cancelled) setUser(data?.session?.user ?? null);
       })
       .catch(() => {
-        setUser(null);
+        if (!cancelled) setUser(null);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
-    // Listen to auth changes (login/logout)
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (cancelled) return;
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
     return () => {
-      // Be defensive — listener may be undefined depending on SDK
+      cancelled = true;
       if (listener && listener.subscription && typeof listener.subscription.unsubscribe === 'function') {
         listener.subscription.unsubscribe();
       }

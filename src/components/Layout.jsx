@@ -3,20 +3,15 @@ import { NavLink, Outlet } from 'react-router-dom';
 import {
   HiSquares2X2,
   HiBookOpen,
-  HiClipboardDocumentList,
-  HiCalendarDays,
   HiSparkles,
   HiClock,
   HiUser,
 } from 'react-icons/hi2';
-
 const nav = [
   { to: '/dashboard', label: 'Dashboard', icon: HiSquares2X2 },
-  { to: '/subjects', label: 'Subjects', icon: HiBookOpen },
-  { to: '/tasks', label: 'Tasks', icon: HiClipboardDocumentList },
-  { to: '/revision', label: 'Revision', icon: HiCalendarDays },
+  { to: '/subjects-tasks', label: 'Subjects & Tasks', icon: HiBookOpen },
   { to: '/pomodoro', label: 'Pomodoro', icon: HiClock },
-  { to: '/ai-tools', label: 'AI Tools', icon: HiSparkles },
+  { to: '/study-buddy', label: 'Study Buddy', icon: HiSparkles },
   { to: '/profile', label: 'Profile', icon: HiUser },
 ];
 
@@ -35,16 +30,18 @@ export function Layout() {
         </div>
         <nav className="app-nav" aria-label="Main">
           {nav.map(({ to, label, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `app-nav__link ${isActive ? 'app-nav__link--active' : ''}`
-              }
-            >
-              <Icon className="app-nav__icon" aria-hidden />
-              <span>{label}</span>
-            </NavLink>
+            <React.Fragment key={to}>
+              <NavLink
+                to={to}
+                className={({ isActive }) =>
+                  `app-nav__link ${isActive ? 'app-nav__link--active' : ''}`
+                }
+              >
+                <Icon className="app-nav__icon" aria-hidden />
+                <span>{label}</span>
+              </NavLink>
+
+            </React.Fragment>
           ))}
         </nav>
       </header>

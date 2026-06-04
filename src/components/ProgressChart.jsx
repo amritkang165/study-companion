@@ -10,7 +10,7 @@ import {
 } from 'recharts';
 import { PieChart, Pie, Cell, Legend } from 'recharts';
 
-const PIE_COLORS = ['#d9468f', '#3d3540'];
+const PIE_COLORS = ['var(--accent)', 'var(--surface)'];
 
 export function SubjectProgressChart({ data }) {
   if (!data?.length) {

@@ -2,45 +2,46 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
+import { supabase } from "../supabaseClient";
 
 export default function Login() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-
-    try {
-      localStorage.setItem("sc-demo-auth", "true");
-
-      localStorage.setItem(
-        "sc-user",
-        JSON.stringify({
-          name: name || "Student",
-          email: email || "student@example.com",
-        })
-      );
-    } catch (err) {
-      console.error(err);
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+      return;
     }
-
     toast.success("Logged in");
     navigate("/dashboard", { replace: true });
   };
 
-  const handleDemo = () => {
-    const demoUser = {
-      name: "Demo Student",
-      email: "demo@example.com",
-    };
-
-    localStorage.setItem("sc-demo-auth", "true");
-    localStorage.setItem("sc-user", JSON.stringify(demoUser));
-
-    toast.info("Signed in as Demo Student");
-    navigate("/dashboard", { replace: true });
+  const handleSignUp = async () => {
+    if (!email || !password) {
+      toast.warning("Enter email and password");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: name || email.split("@")[0] } },
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Check your email to confirm sign up");
   };
 
   return (
@@ -63,50 +64,29 @@ export default function Login() {
       </motion.header>
 
       <section className="panel">
-        <form onSubmit={handleSubmit} className="form">
+        <form onSubmit={handleLogin} className="form">
           <label className="form__label">
             Name
-            <input
-              className="input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-            />
+            <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
           </label>
 
           <label className="form__label">
             Email
-            <input
-              className="input"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-            />
+            <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+          </label>
+
+          <label className="form__label">
+            Password
+            <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter password" required />
           </label>
 
           <div className="form__actions">
-            <button className="btn btn--primary" type="submit">
-              Continue
+            <button className="btn btn--primary" type="submit" disabled={loading}>
+              {loading ? "Signing in…" : "Log in"}
             </button>
 
-            <button
-              type="button"
-              className="btn btn--ghost"
-              onClick={() => {
-                setName("");
-                setEmail("");
-              }}
-            >
-              Clear
-            </button>
-
-            <button
-              type="button"
-              className="btn btn--ghost"
-              onClick={handleDemo}
-            >
-              Demo Login
+            <button type="button" className="btn btn--ghost" onClick={handleSignUp} disabled={loading}>
+              Sign up
             </button>
           </div>
         </form>

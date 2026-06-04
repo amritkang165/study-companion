@@ -71,7 +71,7 @@ export function AITools() {
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h2>AI study assistant</h2>
+        <h2>Study Buddy</h2>
         <p className="muted">
           Generate summaries, questions, and flashcards with Google Gemini
         </p>

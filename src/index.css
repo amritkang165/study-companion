@@ -30,20 +30,15 @@
 .theme-neon { --accent: #7cfc00; --accent-dim: rgba(124,252,0,0.12); --accent-glow: rgba(124,252,0,0.35); }
 .theme-indigo { --accent: #7c3aed; --accent-dim: rgba(124,58,237,0.12); --accent-glow: rgba(124,58,237,0.35); }
 
+/* Ensure selection uses theme variable */
 ::selection { background: var(--accent-dim); color: var(--text); }
 
-/* Right-side theme bar */
-.theme-bar-right {
-  position: fixed;
-  right: 12px;
-  top: 40%;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 999;
-}
+/* Hide the legacy right-side theme palette (moved inline in dashboard header) */
+.theme-bar-right { display: none !important; }
 
-.theme-swatch { width:34px; height:34px; border-radius:8px; border:2px solid transparent; cursor:pointer; box-shadow: 0 6px 24px rgba(0,0,0,0.6); }
+/* Inline theme picker adjustments */
+.theme-picker { display: inline-flex; gap: 0.5rem; align-items: center; }
+.theme-swatch { width:28px; height:28px; border-radius:6px; border:2px solid transparent; cursor:pointer; box-shadow: 0 6px 18px rgba(0,0,0,0.45); }
 .theme-swatch--pink { background: linear-gradient(135deg,#be185d,#d9468f,#f472b6); }
 .theme-swatch--green { background: linear-gradient(135deg,#059669,#10b981); }
 .theme-swatch--blue { background: linear-gradient(135deg,#1e3a8a,#3b82f6); }
@@ -382,7 +377,7 @@ h3,
 }
 
 .search-bar:focus-within {
-  border-color: rgba(217, 70, 143, 0.5);
+  border-color: var(--accent-press);
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
 
@@ -437,9 +432,9 @@ h3,
 
 .tabs__btn--active {
   color: var(--text);
-  border-color: rgba(217, 70, 143, 0.55);
+  border-color: var(--accent-dim);
   background: var(--accent-dim);
-  box-shadow: 0 0 16px rgba(217, 70, 143, 0.14);
+  box-shadow: 0 0 16px var(--accent-dim);
 }
 
 .filters-bar {
@@ -512,7 +507,7 @@ h3,
 
 .input:focus {
   outline: none;
-  border-color: rgba(217, 70, 143, 0.5);
+  border-color: var(--accent-press);
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
 
@@ -555,15 +550,15 @@ h3,
 }
 
 .btn--primary {
-  background: linear-gradient(135deg, #be185d 0%, #d9468f 55%, #ec4899 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent) 55%, var(--accent-press, var(--accent)) 100%);
   color: #fff;
   font-weight: 600;
-  box-shadow: 0 4px 20px rgba(217, 70, 143, 0.3);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 20px var(--accent-glow);
 }
 
 .btn--primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #c23d7f 0%, #e879a9 50%, #f472b6 100%);
-  box-shadow: 0 6px 28px rgba(217, 70, 143, 0.4);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 70%, #fff 30%), color-mix(in srgb, var(--accent-press, var(--accent)) 80%, #fff 20%));
+  box-shadow: 0 6px 28px var(--accent-glow);
 }
 
 .btn--ghost {
@@ -849,7 +844,7 @@ h3,
 
 .study-calendar .react-calendar__tile--active,
 .study-calendar .react-calendar__tile--active:enabled:hover {
-  background: linear-gradient(135deg, #be185d, #d9468f);
+  background: linear-gradient(135deg, var(--accent), var(--accent-press));
   color: #fff;
   font-weight: 600;
 }
@@ -1009,4 +1004,44 @@ h3,
 .Toastify__toast-theme--dark .Toastify__close-button:hover {
   color: var(--text);
   opacity: 1;
+}
+
+/* app-nav theme picker spacing and positioning - adjusted */
+.app-nav .theme-picker { margin-left: 28px; display: flex; align-items: center; gap: 0.5rem; }
+
+/* Small blank spacer to sit between the Dashboard link and the theme picker */
+.nav-gap { width: 28px; display: inline-block; }
+
+/* Slightly shift swatches a bit right so they don't stick to nav text */
+.theme-swatch { margin-left: 12px; }
+
+/* Ensure swatches have a visible focus ring and explicit flex enforcement */
+.theme-swatch:focus { outline: 3px solid rgba(255,255,255,0.06); }
+.theme-picker { display: flex !important; gap: 0.5rem; align-items: center; }
+
+/* Subjects & Tasks split layout */
+.subjects-tasks-split {
+  display: flex;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+}
+.subjects-panel,
+.tasks-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.subjects-scroll,
+.tasks-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.split-divider {
+  width: 1px;
+  margin: 0 1rem;
+  background: var(--border-strong);
+  flex-shrink: 0;
 }

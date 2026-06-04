@@ -6,9 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import { Layout } from './components/Layout.jsx';
 import { Dashboard } from './pages/Dashboard.jsx';
-import { Subjects } from './pages/Subjects.jsx';
-import { Tasks } from './pages/Tasks.jsx';
-import { Revision } from './pages/Revision.jsx';
+import { SubjectsTasks } from './pages/SubjectsTasks.jsx';
 import { AITools } from './pages/AITools.jsx';
 import { StudyProvider } from './context/StudyContext.jsx';
 import Pomodoro from './pages/Pomodoro.jsx';
@@ -36,12 +34,13 @@ function App() {
           >
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="subjects" element={<Subjects />} />
-            <Route path="tasks" element={<Tasks />} />
-            <Route path="revision" element={<Revision />} />
+            <Route path="subjects-tasks" element={<SubjectsTasks />} />
             <Route path="pomodoro" element={<Pomodoro />} />
             <Route path="profile" element={<ProfilePage />} />
-            <Route path="ai-tools" element={<AITools />} />
+            <Route path="study-buddy" element={<AITools />} />
+            <Route path="ai-tools" element={<Navigate to="/study-buddy" replace />} />
+            <Route path="subjects" element={<Navigate to="/subjects-tasks" replace />} />
+            <Route path="tasks" element={<Navigate to="/subjects-tasks" replace />} />
           </Route>
 
           {/* FALLBACK */}

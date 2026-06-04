@@ -1,8 +1,6 @@
 import {
   groqHttp,
-  quotesHttp,
   requireGroqApiKey,
-  apiCall
 } from './api.js';
 const DEFAULT_GROQ_MODEL = process.env.REACT_APP_GROQ_MODEL || 'llama3-70b-8192';
 
@@ -83,10 +81,16 @@ export async function generateFlashcards(topicName, count = 8) {
   );
 }
 
+const QUOTES_API_KEY = 'R4SuuMbNIXz5kmIT6FN9BZjTAeFf0AElzuInxKui';
+
 export async function fetchMotivationalQuote() {
-  const { data } = await quotesHttp.get('/random');
+  const response = await fetch('https://api.api-ninjas.com/v2/quoteoftheday', {
+    headers: { 'X-Api-Key': QUOTES_API_KEY },
+  });
+  const data = await response.json();
+  const quote = Array.isArray(data) ? data[0] : data;
   return {
-    text: data?.content ?? '',
-    author: data?.author ?? '',
+    text: quote?.quote ?? '',
+    author: quote?.author ?? '',
   };
 }
