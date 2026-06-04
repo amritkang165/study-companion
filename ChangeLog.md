@@ -1,5 +1,13 @@
 # Changelog
 
+- 2026-06-04 23:30:00 - Study Buddy AI fixes, questions & summary UI overhaul:
+  - Fixed "Invalid API Key" error: updated default model from decommissioned `llama3-70b-8192` to `llama-3.3-70b-versatile`.
+  - Fixed Study Buddy setup panel: corrected "Connect Gemini" → "Connect Groq", Google AI Studio link → console.groq.com/keys, key format `AIza…` → `gsk_…`.
+  - Created `<QuestionsViewer>` component: parses AI output into styled cards with number badges, difficulty tags (Easy/Medium/Hard with color coding), and expandable answers revealed by clicking.
+  - Updated practice questions prompt to include `**bold**` answers and difficulty tags in parentheses.
+  - Created `<SummaryViewer>` component: renders topic summaries with parsed headings (## / **bold**), bullet lists, numbered lists, inline bold, and proper paragraph spacing — replaces raw `<pre>` block.
+  - Summary and questions modes now use rich card/panel layouts instead of monospace `<pre>`.
+
 - 2026-06-04 22:30:00 - Task experience improvements, analytics, consistency tracking, profile page:
   - Added status filter tabs (All/Pending/Completed/Overdue) with counts to tasks panel on Subjects & Tasks page.
   - Added sort toggle (by deadline / by priority) for the task list.

@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-toastify';
 import { useProgress } from '../hooks/useProgress';
+import { useTasks } from '../hooks/useTasks';
 import { useTheme } from '../context/ThemeContext.jsx';
 import { useAuth } from '../context/AuthContext';
 import { CompletionPie, WeeklyProductivityChart, ConsistencyHeatmap, PriorityBreakdown } from '../components/ProgressChart';
 import { fetchMotivationalQuote } from '../services/aiService';
 import { differenceInDays } from 'date-fns';
+import { formatDateDisplay, isTaskOverdue, priorityOrder } from '../utils/helpers';
 import FullscreenPomodoro from '../components/FullscreenPomodoro.jsx';
 import FocusMode from '../components/FocusMode.jsx';
 
 export function Dashboard() {
   const { total, completed, pending, overdue, completionPercent, weekly, streak, monthly, priorities, weekComparison } = useProgress();
+  const { tasks, addTask, updateTask, deleteTask } = useTasks();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [quote, setQuote] = useState(null);
   const [quoteLoading, setQuoteLoading] = useState(true);
   const { theme, setTheme } = useTheme();
@@ -19,6 +25,28 @@ export function Dashboard() {
   const [examDate, setExamDate] = useState(() => localStorage.getItem('exam-countdown-date') || '');
   const [showExamPicker, setShowExamPicker] = useState(false);
   const [showFocusMode, setShowFocusMode] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+
+  const displayTasks = [...tasks]
+    .filter((t) => t.status !== 'Completed')
+    .sort((a, b) => {
+      const aOver = isTaskOverdue(a);
+      const bOver = isTaskOverdue(b);
+      if (aOver && !bOver) return -1;
+      if (!aOver && bOver) return 1;
+      return priorityOrder(a.priority) - priorityOrder(b.priority);
+    })
+    .slice(0, 10);
+
+  const handleQuickAdd = () => {
+    const title = newTaskTitle.trim();
+    if (!title) return;
+    addTask({ title, status: 'Pending', priority: 'Medium' });
+    setNewTaskTitle('');
+    toast.success('Task added');
+  };
+
+  const completedTaskCount = tasks.filter((t) => t.status === 'Completed').length;
 
   useEffect(() => {
     localStorage.setItem('exam-countdown-date', examDate);
@@ -137,10 +165,67 @@ export function Dashboard() {
 
       <div className="dashboard-grid">
         <ConsistencyHeatmap monthly={monthly} streak={streak} weekComparison={weekComparison} />
-        <PriorityBreakdown priorities={priorities} />
+        <div className="panel" style={{ display: 'flex', flexDirection: 'column', maxHeight: 340 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="panel__title" style={{ margin: 0, fontSize: '0.95rem' }}>Active tasks ({tasks.length - completedTaskCount})</h3>
+            <button type="button" className="btn btn--ghost btn--sm" style={{ fontSize: '0.75rem' }} onClick={() => navigate('/subjects-tasks')}>View all</button>
+          </div>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+            <input
+              className="input input--sm" style={{ flex: 1, minWidth: 0 }}
+              placeholder="Quick add task…"
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleQuickAdd()}
+            />
+            <button type="button" className="btn btn--primary btn--sm" onClick={handleQuickAdd}>Add</button>
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {displayTasks.length === 0 && (
+              <p className="muted small" style={{ margin: 'auto', textAlign: 'center' }}>All caught up! 🎉</p>
+            )}
+            <AnimatePresence mode="popLayout">
+              {displayTasks.map((t) => (
+                <motion.div
+                  key={t.id}
+                  layout
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, height: 0 }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px',
+                    borderRadius: 8, background: 'var(--surface-2)',
+                    borderLeft: isTaskOverdue(t) ? '3px solid var(--danger)' : '3px solid transparent',
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={false}
+                    onChange={() => { updateTask(t.id, { status: 'Completed' }); toast.success('Task completed'); }}
+                    style={{ accentColor: 'var(--accent)', width: 16, height: 16, cursor: 'pointer', flexShrink: 0 }}
+                  />
+                  <div style={{ flex: 1, minWidth: 0, fontSize: '0.85rem' }}>
+                    <div style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>
+                      {t.subject || ''}{t.deadline ? ` · ${formatDateDisplay(t.deadline)}` : ''}
+                    </div>
+                  </div>
+                  <button
+                    type="button" className="btn btn--ghost btn--sm"
+                    style={{ fontSize: '0.65rem', padding: '2px 6px', opacity: 0.5 }}
+                    onClick={() => { deleteTask(t.id); toast.info('Task removed'); }}
+                  >✕</button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        </div>
         <div className="panel">
           <CompletionPie percent={completionPercent} />
         </div>
+        {priorities.some((p) => p.count > 0) && (
+          <PriorityBreakdown priorities={priorities} />
+        )}
         <div className="panel panel--wide">
           <WeeklyProductivityChart data={weekly} />
         </div>

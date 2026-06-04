@@ -2,7 +2,7 @@ import {
   groqHttp,
   requireGroqApiKey,
 } from './api.js';
-const DEFAULT_GROQ_MODEL = process.env.REACT_APP_GROQ_MODEL || 'llama3-70b-8192';
+const DEFAULT_GROQ_MODEL = process.env.REACT_APP_GROQ_MODEL || 'llama-3.3-70b-versatile';
 
 function buildGroqBody(messages, options = {}) {
   return {
@@ -53,14 +53,14 @@ export async function generatePracticeQuestions(topicName, count = 5) {
       {
         role: 'system',
         content:
-          'You are a tutor. Output numbered practice questions only, with brief difficulty tags (Easy/Medium/Hard).',
+          'You are a tutor. Output numbered practice questions. After each question, put the answer in bold on a new line using **answer here**. Tag each question with difficulty in parentheses: (Easy), (Medium), or (Hard).',
       },
       {
         role: 'user',
         content: `Generate ${count} practice questions about: ${topicName}`,
       },
     ],
-    { maxOutputTokens: 1200 }
+    { maxOutputTokens: 2000 }
   );
 }
 

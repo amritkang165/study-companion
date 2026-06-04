@@ -9,6 +9,8 @@ import {
 import { isGroqConfigured } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { FlashcardViewer, parseFlashcards } from '../components/FlashcardViewer';
+import { QuestionsViewer, parseQuestions } from '../components/QuestionsViewer';
+import { SummaryViewer } from '../components/SummaryViewer';
 
 const MODES = [
   { id: 'summary', label: 'Topic summary' },
@@ -56,7 +58,7 @@ export function AITools() {
       toast.error(missingKey ? 'Groq API key missing or invalid' : msg);
       setOutput(
         missingKey
-          ? 'Add your key to a `.env` file in the project root (next to package.json):\n\nREACT_APP_GROQ_API_KEY=AIza…\n\nThen stop the dev server and run npm start again.\n\nTip: copy .env.example to .env and paste your key from Google AI Studio.'
+          ? 'Add your key to a `.env` file in the project root (next to package.json):\n\nREACT_APP_GROQ_API_KEY=gsk_…\n\nThen stop the dev server and run npm start again.\n\nGet a key at https://console.groq.com/keys'
           : `Could not reach the AI service.\n\n${msg}`
       );
     } finally {
@@ -73,14 +75,14 @@ export function AITools() {
       >
         <h2>Study Buddy</h2>
         <p className="muted">
-          Generate summaries, questions, and flashcards with Google Gemini
+          Generate summaries, questions, and flashcards with AI
         </p>
       </motion.header>
 
       {!isGroqConfigured() && (
         <section className="panel ai-setup-panel" aria-labelledby="ai-setup-title">
           <h3 id="ai-setup-title" className="panel__title">
-            Connect Gemini (required)
+            Connect Groq (required)
           </h3>
           <ol className="ai-setup-panel__steps">
             <li>
@@ -89,18 +91,18 @@ export function AITools() {
               <code>.env</code>.
             </li>
             <li>
-              Create an API key in{' '}
+              Create an API key at{' '}
               <a
-                href="https://aistudio.google.com/app/apikey"
+                href="https://console.groq.com/keys"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Google AI Studio
+                console.groq.com/keys
               </a>
               .
             </li>
             <li>
-              Set <code>REACT_APP_GROQ_API_KEY=AIza…</code> in <code>.env</code>.
+              Set <code>REACT_APP_GROQ_API_KEY=gsk_…</code> in <code>.env</code>.
             </li>
             <li>
               Restart the dev server (<kbd>Ctrl+C</kbd> then <code>npm start</code>
@@ -164,8 +166,13 @@ export function AITools() {
           {!loading && output && mode === 'flashcards' && (
             <FlashcardViewer flashcards={parseFlashcards(output)} />
           )}
-          {!loading && output && mode !== 'flashcards' && (
-            <pre className="ai-output__pre">{output}</pre>
+          {!loading && output && mode === 'questions' && (
+            <QuestionsViewer questions={parseQuestions(output)} />
+          )}
+          {!loading && output && mode === 'summary' && (
+            <div className="panel" style={{ marginTop: '1rem', background: 'var(--surface)' }}>
+              <SummaryViewer text={output} />
+            </div>
           )}
           {!loading && !output && (
             <p className="muted">
