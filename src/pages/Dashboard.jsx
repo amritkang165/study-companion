@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { useProgress } from '../hooks/useProgress';
 import { useTasks } from '../hooks/useTasks';
-import { useTheme } from '../context/ThemeContext.jsx';
 import { useAuth } from '../context/AuthContext';
 import { CompletionPie, WeeklyProductivityChart, ConsistencyHeatmap, PriorityBreakdown } from '../components/ProgressChart';
 import { fetchMotivationalQuote } from '../services/aiService';
@@ -20,7 +19,6 @@ export function Dashboard() {
   const navigate = useNavigate();
   const [quote, setQuote] = useState(null);
   const [quoteLoading, setQuoteLoading] = useState(true);
-  const { theme, setTheme } = useTheme();
   const [showPomodoroFS, setShowPomodoroFS] = useState(false);
   const [examDate, setExamDate] = useState(() => localStorage.getItem('exam-countdown-date') || '');
   const [showExamPicker, setShowExamPicker] = useState(false);
@@ -79,10 +77,18 @@ export function Dashboard() {
 
   return (
     <div className="page dashboard">
+      {/* Decorative notch */}
+      <div style={{
+        position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)',
+        width: 'clamp(160px, 30vw, 320px)', height: '180px',
+        background: `radial-gradient(ellipse 60% 100% at 50% 0%, var(--warm-dim), transparent 70%)`,
+        pointerEvents: 'none', zIndex: 0,
+      }} />
       <motion.header
         className="page-header"
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
+        style={{ position: 'relative', zIndex: 1 }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -91,7 +97,7 @@ export function Dashboard() {
               <p className="muted" style={{ margin: 0 }}>Your study progress at a glance</p>
             </div>
             {daysLeft !== null && daysLeft >= 0 && (
-              <div className="exam-countdown" style={{ padding: '4px 14px', background: 'var(--accent-dim)', borderRadius: 'var(--radius)', border: '1px solid var(--accent)', whiteSpace: 'nowrap' }}>
+              <div className="exam-countdown" style={{ padding: '4px 14px', background: 'var(--accent-dim)', borderRadius: 'var(--radius-pill)', border: '1px solid var(--accent)', whiteSpace: 'nowrap' }}>
                 <strong style={{ fontSize: '1.1rem' }}>{daysLeft}</strong>
                 <span className="muted" style={{ fontSize: '0.8rem', marginLeft: 4 }}>day{daysLeft !== 1 ? 's' : ''} left</span>
               </div>
@@ -124,27 +130,6 @@ export function Dashboard() {
         )}
       </motion.header>
 
-      <div
-        className="theme-picker"
-        role="toolbar"
-        aria-label="Theme chooser"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.5rem',
-          margin: '-0.25rem 0 0.75rem auto',
-          width: 'fit-content',
-        }}
-      >
-        <button aria-pressed={theme === 'theme-pink'} title="Pink" className="theme-swatch theme-swatch--pink" onClick={() => setTheme('theme-pink')} />
-        <button aria-pressed={theme === 'theme-green'} title="Green" className="theme-swatch theme-swatch--green" onClick={() => setTheme('theme-green')} />
-        <button aria-pressed={theme === 'theme-blue'} title="Blue" className="theme-swatch theme-swatch--blue" onClick={() => setTheme('theme-blue')} />
-        <button aria-pressed={theme === 'theme-yellow'} title="Yellow" className="theme-swatch theme-swatch--yellow" onClick={() => setTheme('theme-yellow')} />
-        <button aria-pressed={theme === 'theme-neon'} title="Neon" className="theme-swatch theme-swatch--neon" onClick={() => setTheme('theme-neon')} />
-        <button aria-pressed={theme === 'theme-indigo'} title="Indigo" className="theme-swatch theme-swatch--indigo" onClick={() => setTheme('theme-indigo')} />
-      </div>
-
       <section className="quote-card" aria-live="polite">
         {quoteLoading ? (
           <p className="muted">Loading quote…</p>
@@ -156,12 +141,20 @@ export function Dashboard() {
         )}
       </section>
 
-      <section className="stat-grid" aria-label="Summary stats">
+      <motion.section
+        className="stat-grid" aria-label="Summary stats"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: {},
+          visible: { transition: { staggerChildren: 0.07 } },
+        }}
+      >
         <StatCard label="Total tasks" value={total} />
         <StatCard label="Completed" value={completed} accent="var(--success)" />
         <StatCard label="Pending" value={pending} />
         <StatCard label="Overdue" value={overdue} warn={overdue > 0} />
-      </section>
+      </motion.section>
 
       <div className="dashboard-grid">
         <ConsistencyHeatmap monthly={monthly} streak={streak} weekComparison={weekComparison} />
@@ -198,12 +191,22 @@ export function Dashboard() {
                     borderLeft: isTaskOverdue(t) ? '3px solid var(--danger)' : '3px solid transparent',
                   }}
                 >
-                  <input
-                    type="checkbox"
-                    checked={false}
-                    onChange={() => { updateTask(t.id, { status: 'Completed' }); toast.success('Task completed'); }}
-                    style={{ accentColor: 'var(--accent)', width: 16, height: 16, cursor: 'pointer', flexShrink: 0 }}
-                  />
+                  <motion.button
+                    type="button"
+                    onClick={() => { updateTask(t.id, { status: 'Completed' }); toast.success('Task completed'); }}
+                    whileTap={{ scale: 0.8 }}
+                    style={{
+                      width: 22, height: 22, borderRadius: 8, flexShrink: 0,
+                      border: `1px solid ${isTaskOverdue(t) ? 'var(--danger)' : 'var(--border)'}`,
+                      background: 'transparent', cursor: 'pointer', padding: 0,
+                      display: 'grid', placeItems: 'center',
+                      color: 'transparent', transition: 'all 0.2s',
+                    }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--accent-press)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="2,6 5,9 10,2" />
+                    </svg>
+                  </motion.button>
                   <div style={{ flex: 1, minWidth: 0, fontSize: '0.85rem' }}>
                     <div style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</div>
                     <div style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>
@@ -244,14 +247,18 @@ export function Dashboard() {
 
 function StatCard({ label, value, accent, warn }) {
   return (
-    <div
+    <motion.div
       className={`stat-card ${warn ? 'stat-card--warn' : ''}`}
       style={accent ? { borderColor: accent } : undefined}
+      variants={{
+        hidden: { opacity: 0, y: 12, scale: 0.95 },
+        visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 200, damping: 18 } },
+      }}
     >
       <span className="stat-card__value" style={{ color: accent }}>
         {value}
       </span>
       <span className="stat-card__label">{label}</span>
-    </div>
+    </motion.div>
   );
 }

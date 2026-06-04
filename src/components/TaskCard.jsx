@@ -19,7 +19,7 @@ export function TaskCard({ task, onToggleComplete, onDelete }) {
       animate={{ opacity: 1, y: 0 }}
     >
       <div className="task-card__main">
-        <button
+        <motion.button
           type="button"
           className="task-card__check"
           onClick={() =>
@@ -31,9 +31,16 @@ export function TaskCard({ task, onToggleComplete, onDelete }) {
           aria-label={
             task.status === 'Completed' ? 'Mark pending' : 'Mark complete'
           }
+          whileTap={{ scale: 0.8 }}
+          whileHover={{ scale: 1.08 }}
+          animate={
+            task.status === 'Completed'
+              ? { scale: [1, 1.25, 1], rotate: [0, -10, 0], transition: { duration: 0.35 } }
+              : { scale: 1 }
+          }
         >
           <HiCheck />
-        </button>
+        </motion.button>
         <div>
           <h3 className="task-card__title">{task.title}</h3>
           <p className="task-card__sub">
