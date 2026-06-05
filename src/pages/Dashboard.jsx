@@ -83,8 +83,8 @@ export function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         style={{ position: 'relative', zIndex: 1 }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <div>
               <h2 style={{ margin: 0 }}>Welcome{userName ? `, ${userName}` : ''}</h2>
               <p className="muted" style={{ margin: 0 }}>Your study progress at a glance</p>
