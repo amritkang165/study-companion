@@ -1,6 +1,15 @@
 -- Run this in your Supabase SQL Editor (https://supabase.com/dashboard/project/_/sql/new)
+-- Drops old incompatible tables and creates the correct ones.
 
-CREATE TABLE IF NOT EXISTS subjects (
+DROP TABLE IF EXISTS public.achievements;
+DROP TABLE IF EXISTS public.pomodoro_sessions;
+DROP TABLE IF EXISTS public.revisions;
+DROP TABLE IF EXISTS public.tasks;
+DROP TABLE IF EXISTS public.topics;
+DROP TABLE IF EXISTS public.subjects;
+DROP TABLE IF EXISTS public.schedules;
+
+CREATE TABLE public.subjects (
   id TEXT PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -9,7 +18,7 @@ CREATE TABLE IF NOT EXISTS subjects (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS topics (
+CREATE TABLE public.topics (
   id TEXT PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   "subjectId" TEXT NOT NULL REFERENCES subjects(id) ON DELETE CASCADE,
@@ -20,7 +29,7 @@ CREATE TABLE IF NOT EXISTS topics (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS tasks (
+CREATE TABLE public.tasks (
   id TEXT PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
@@ -33,7 +42,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS revisions (
+CREATE TABLE public.revisions (
   id TEXT PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   "topicId" TEXT,
