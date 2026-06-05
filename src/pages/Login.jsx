@@ -1,16 +1,31 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 import { supabase } from "../supabaseClient";
 
 export default function Login() {
+  const { user, loading: authLoading } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  if (authLoading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', background: 'var(--bg)', color: 'var(--muted)' }}>
+        <div className="loading-spinner">
+          <div className="loading-spinner__ring" />
+          <span className="loading-spinner__label">Loading…</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (user) return <Navigate to="/dashboard" replace />;
 
   const handleLogin = async (e) => {
     e.preventDefault();
