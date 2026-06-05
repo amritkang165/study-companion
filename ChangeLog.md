@@ -3,6 +3,7 @@
 - 2026-06-05 00:45 — Dark/light mode toggle: sun/moon button in nav bar, persisted to localStorage, `.dark` CSS class with full variable overrides
 - 2026-06-05 00:30 — Neo-brutalist light mode redesign: warm cream bg, 2px solid borders, hard offset shadows, 3-column dashboard layout, solid accent fills, no glass/blur effects
 - 2026-06-05 00:15 — Day streak stat card added to dashboard stat grid; chart empty states now use visible grey (`#e0dbd5`); removed decorative glow notch from dashboard
+- 2026-06-05 00:00 — Migrated all study data (subjects, topics, tasks, revisions) from localStorage to Supabase. Data persists across devices and survives cache clears. Existing localStorage data auto-migrates on first login. Created `supabase-migration.sql` for table setup.
 - 2026-06-04 23:55 — Warm/human UI overhaul: rose/amber palette, pill shapes, noise texture, staggered spring animations, bounce checkboxes
 - 2026-06-04 23:45 — Font swap: MuseoModerno (display) + Outfit (body) replaced Inter + Plus Jakarta Sans
 - 2026-06-04 23:30 — Study Buddy AI fixes: updated decommissioned model to `llama-3.3-70b-versatile`, fixed Gemini→Groq references; created `<QuestionsViewer>` and `<SummaryViewer>` for rich AI output rendering
