@@ -9,7 +9,6 @@ import { CompletionPie, WeeklyProductivityChart, ConsistencyHeatmap, PriorityBre
 import { fetchMotivationalQuote } from '../services/aiService';
 import { differenceInDays } from 'date-fns';
 import { formatDateDisplay, isTaskOverdue, priorityOrder } from '../utils/helpers';
-import FullscreenPomodoro from '../components/FullscreenPomodoro.jsx';
 import FocusMode from '../components/FocusMode.jsx';
 
 export function Dashboard() {
@@ -19,10 +18,9 @@ export function Dashboard() {
   const navigate = useNavigate();
   const [quote, setQuote] = useState(null);
   const [quoteLoading, setQuoteLoading] = useState(true);
-  const [showPomodoroFS, setShowPomodoroFS] = useState(false);
+  const [showFocusMode, setShowFocusMode] = useState(false);
   const [examDate, setExamDate] = useState(() => localStorage.getItem('exam-countdown-date') || '');
   const [showExamPicker, setShowExamPicker] = useState(false);
-  const [showFocusMode, setShowFocusMode] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
   const displayTasks = [...tasks]
@@ -87,7 +85,6 @@ export function Dashboard() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <div>
               <h2 style={{ margin: 0 }}>Welcome{userName ? `, ${userName}` : ''}</h2>
-              <p className="muted" style={{ margin: 0 }}>Your study progress at a glance</p>
             </div>
             {daysLeft !== null && daysLeft >= 0 && (
               <div className="exam-countdown" style={{ padding: '4px 14px', background: 'var(--accent-dim)', borderRadius: 'var(--radius-pill)', border: '1px solid var(--accent)', whiteSpace: 'nowrap' }}>
@@ -107,9 +104,6 @@ export function Dashboard() {
                 Clear exam
               </button>
             )}
-            <button type="button" className="btn btn--primary" onClick={() => setShowPomodoroFS(true)}>
-              Open Pomodoro
-            </button>
             <button type="button" className="btn btn--primary" onClick={() => setShowFocusMode(true)} style={{ background: 'var(--accent)', borderColor: 'var(--accent)' }}>
               Focus Mode
             </button>
@@ -232,10 +226,6 @@ export function Dashboard() {
           )}
         </div>
       </div>
-
-      {showPomodoroFS && (
-        <FullscreenPomodoro onClose={() => setShowPomodoroFS(false)} />
-      )}
 
       {showFocusMode && (
         <FocusMode onClose={() => setShowFocusMode(false)} />
