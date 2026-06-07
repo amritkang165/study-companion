@@ -130,16 +130,23 @@ export function computeStreak(completedDates) {
   return { current, longest };
 }
 
-export function getMonthlyActivity(tasks, year, month) {
-  const daysInMonth = new Date(year, month, 0).getDate();
+export function getMonthlyActivity(tasks, year, month, numMonths = 1) {
   const completionDates = getCompletionDates(tasks);
   const counts = {};
   completionDates.forEach((d) => { counts[d] = (counts[d] || 0) + 1; });
 
   const result = [];
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    result.push({ date: d, count: counts[dateStr] || 0 });
+  for (let i = numMonths - 1; i >= 0; i--) {
+    let targetMonth = month - i;
+    let targetYear = year;
+    while (targetMonth <= 0) { targetMonth += 12; targetYear -= 1; }
+    while (targetMonth > 12) { targetMonth -= 12; targetYear += 1; }
+
+    const daysInMonth = new Date(targetYear, targetMonth, 0).getDate();
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${targetYear}-${String(targetMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      result.push({ date: d, count: counts[dateStr] || 0, month: targetMonth, year: targetYear });
+    }
   }
   return result;
 }

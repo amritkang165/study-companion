@@ -29,7 +29,7 @@ export function useProgress() {
     const completionDates = getCompletionDates(tasks);
     const streak = computeStreak(completionDates);
     const now = new Date();
-    const monthly = getMonthlyActivity(tasks, now.getFullYear(), now.getMonth() + 1);
+    const monthly = getMonthlyActivity(tasks, now.getFullYear(), now.getMonth() + 1, 2);
     const priorities = priorityBreakdown(tasks);
     const weekComparison = thisWeekVsLastWeek(tasks);
 

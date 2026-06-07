@@ -106,24 +106,39 @@ function heatColor(count, max) {
 
 export function ConsistencyHeatmap({ monthly, streak, weekComparison }) {
   const maxCount = Math.max(...monthly.map((d) => d.count), 1);
-  const weeks = [];
-  let week = [];
-  const firstDow = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay();
-  const emptyStart = firstDow === 0 ? 6 : firstDow - 1;
-  for (let i = 0; i < emptyStart; i++) week.push(null);
-  monthly.forEach((d) => {
-    week.push(d);
-    if (week.length === 7) {
+
+  function buildWeeks(data) {
+    const first = data[0];
+    const firstDow = first
+      ? new Date(first.year, first.month - 1, 1).getDay()
+      : 1;
+    const emptyStart = firstDow === 0 ? 6 : firstDow - 1;
+    const weeks = [];
+    let week = [];
+    for (let i = 0; i < emptyStart; i++) week.push(null);
+    data.forEach((d) => {
+      week.push(d);
+      if (week.length === 7) {
+        weeks.push(week);
+        week = [];
+      }
+    });
+    if (week.length) {
+      while (week.length < 7) week.push(null);
       weeks.push(week);
-      week = [];
     }
-  });
-  if (week.length) {
-    while (week.length < 7) week.push(null);
-    weeks.push(week);
+    return weeks;
   }
 
-  const monthName = new Date().toLocaleString('default', { month: 'long' });
+  const monthMap = {};
+  monthly.forEach((d) => {
+    if (!d) return;
+    const key = `${d.year}-${d.month}`;
+    if (!monthMap[key]) monthMap[key] = [];
+    monthMap[key].push(d);
+  });
+
+  const entries = Object.entries(monthMap).sort();
 
   return (
     <div className="panel">
@@ -144,32 +159,50 @@ export function ConsistencyHeatmap({ monthly, streak, weekComparison }) {
           </span>
         </div>
       </div>
-      <div style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: 4, color: 'var(--muted)' }}>{monthName}</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {weeks.map((w, wi) => (
-          <div key={wi} style={{ display: 'flex', gap: 2 }}>
-            {w.map((d, di) => (
-              <div
-                key={di}
-                title={d ? `${d.count} task${d.count !== 1 ? 's' : ''}` : ''}
-                style={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: 3,
-                  background: d ? heatColor(d.count, maxCount) : 'var(--surface-2)',
-                  border: '1px solid var(--border)',
-                }}
-              />
-            ))}
+      <div style={{ display: 'flex', gap: 16, justifyContent: 'space-between' }}>
+        {entries.map(([key, data]) => {
+          const [y, m] = key.split('-');
+          const label = new Date(+y, +m - 1).toLocaleString('default', { month: 'long' });
+          const weeks = buildWeeks(data);
+          return (
+            <div key={key} style={{ flex: 1 }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: 4, color: 'var(--muted)' }}>{label}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {weeks.map((w, wi) => (
+                  <div key={wi} style={{ display: 'flex', gap: 2 }}>
+                    {w.map((d, di) => (
+                      <div
+                        key={di}
+                        title={d ? `${d.count} task${d.count !== 1 ? 's' : ''}` : ''}
+                        style={{
+                          width: 14,
+                          height: 14,
+                          borderRadius: 3,
+                          background: d ? heatColor(d.count, maxCount) : 'var(--surface-2)',
+                          border: '1px solid var(--border)',
+                        }}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, padding: '6px 8px', background: 'var(--surface-2)', borderRadius: 4, border: '1px solid var(--border)' }}>
+        {[
+          { color: HEAT_COLORS[0], label: '0 tasks' },
+          { color: HEAT_COLORS[1], label: '1-2' },
+          { color: HEAT_COLORS[2], label: '3-5' },
+          { color: HEAT_COLORS[3], label: '6-8' },
+          { color: HEAT_COLORS[4], label: '9+' },
+        ].map((item) => (
+          <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{ width: 14, height: 14, borderRadius: 2, background: item.color, border: '1px solid var(--border)' }} />
+            <span style={{ fontSize: '0.7rem', color: 'var(--muted)', fontWeight: 500 }}>{item.label}</span>
           </div>
         ))}
-      </div>
-      <div style={{ display: 'flex', gap: 4, alignItems: 'center', marginTop: 6 }}>
-        <span style={{ fontSize: '0.65rem', color: 'var(--muted)' }}>Less</span>
-        {HEAT_COLORS.map((c) => (
-          <div key={c} style={{ width: 10, height: 10, borderRadius: 2, background: c }} />
-        ))}
-        <span style={{ fontSize: '0.65rem', color: 'var(--muted)' }}>More</span>
       </div>
     </div>
   );
